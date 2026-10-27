@@ -24,13 +24,12 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: Install Android platform packages
+      - name: Install Android SDK packages
         shell: bash
         run: |
           echo "Using Android SDK root: $ANDROID_SDK_ROOT"
-          mkdir -p "$ANDROID_SDK_ROOT"
-          yes | sdkmanager --licenses >/dev/null
-          sdkmanager --sdk_root="$ANDROID_SDK_ROOT" "cmdline-tools;latest" "platform-tools" "platforms;android-34" "build-tools;34.0.0"
+          yes | sdkmanager --licenses
+          sdkmanager --install "platform-tools" "platforms;android-34" "build-tools;34.0.0"
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3
