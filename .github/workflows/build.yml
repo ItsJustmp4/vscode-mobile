@@ -19,19 +19,34 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install Android platform packages
+        run: |
+          yes | sdkmanager --licenses
+          sdkmanager "platforms;android-34" "build-tools;34.0.0"
+
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3
 
-      - name: Generate Wrapper & Build
+      - name: Generate Gradle Wrapper if missing and build
         run: |
-          gradle wrapper
-          chmod +x gradlew
-          ./gradlew assembleDebug --stacktrace
+          if [ ! -f ./gradlew ]; then
+            gradle wrapper
+          fi
+          chmod +x ./gradlew
+          ./gradlew clean assembleDebug --stacktrace
 
       - name: Prepare Artifacts (APK & ZIP)
         run: |
           mkdir -p dist
-          cp app/build/outputs/apk/debug/app-debug.apk dist/vscode-mobile.apk
+          APK_PATH=$(find app/build/outputs -type f -name '*.apk' | head -n 1)
+          if [ -z "$APK_PATH" ]; then
+            echo "No APK found in app/build/outputs"
+            exit 1
+          fi
+          cp "$APK_PATH" dist/vscode-mobile.apk
           cd dist
           zip -r vscode-mobile.zip vscode-mobile.apk
 
